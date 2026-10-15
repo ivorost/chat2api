@@ -140,6 +140,13 @@ class ChatService:
         else:
             self.gizmo_id = None
 
+        # OpenAI's "*-search-preview" models (e.g. gpt-4o-mini-search-preview) do not exist on the
+        # ChatGPT backend. Map them to their base model and turn on ChatGPT's built-in web search.
+        # OpenAI API clients can also request search explicitly via `web_search_options`.
+        self.system_hints = []
+        if "-search" in self.origin_model or self.data.get("web_search_options") is not None:
+            self.system_hints.append("search")
+
         if "o3-mini-high" in self.origin_model:
             self.req_model = "o3-mini-high"
         elif "o3-mini-medium" in self.origin_model:
@@ -309,6 +316,8 @@ class ChatService:
             conversation_mode = {"kind": "primary_assistant"}
 
         logger.info(f"Model mapping: {self.origin_model} -> {self.req_model}")
+        if self.system_hints:
+            logger.info(f"System hints: {self.system_hints}")
         self.chat_request = {
             "action": "next",
             "client_contextual_info": {
@@ -335,7 +344,7 @@ class ChatService:
             "reset_rate_limits": False,
             "suggestions": [],
             "supported_encodings": [],
-            "system_hints": [],
+            "system_hints": self.system_hints,
             "timezone": "America/Los_Angeles",
             "timezone_offset_min": -480,
             "variant_purpose": "comparison_implicit",
