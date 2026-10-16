@@ -247,6 +247,8 @@ async def stream_response(service, response, model, max_tokens):
                     if outer_content_type == "text":
                         part = content.get("parts", [])[0]
                         if not part:
+                            if message_id != last_message_id:
+                                len_last_content = 0
                             if role == 'assistant' and last_role != 'assistant':
                                 if last_role == None:
                                     new_text = ""
