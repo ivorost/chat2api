@@ -15,7 +15,51 @@ from api.models import model_system_fingerprint
 from api.tokens import split_tokens_from_content, calculate_image_tokens, num_tokens_from_messages
 from utils.Logger import logger
 
-moderation_message = "I'm sorry, I cannot provide or engage in any content related to pornography, violence, or any unethical material. If you have any other questions or need assistance, please feel free to let me know. I'll do my best to provide support and assistance."
+ENTITY_START = ""
+ENTITY_END = ""
+ENTITY_SEP = ""
+
+
+class EntityMarkerFilter:
+    """Strips ChatGPT inline entity markers (e.g. citeturn0search10) from streamed text.
+
+    Markers may be split across chunks, so text after an unclosed start marker is buffered."""
+
+    def __init__(self):
+        self.buffer = ""
+
+    def feed(self, text):
+        self.buffer += text
+        result = ""
+        while True:
+            start = self.buffer.find(ENTITY_START)
+            if start == -1:
+                result += self.buffer
+                self.buffer = ""
+                break
+            result += self.buffer[:start]
+            end = self.buffer.find(ENTITY_END, start)
+            if end == -1:
+                self.buffer = self.buffer[start:]
+                break
+            result += self.render(self.buffer[start + 1:end])
+            self.buffer = self.buffer[end + 1:]
+        return result
+
+    def flush(self):
+        rest, self.buffer = self.buffer, ""
+        return rest.replace(ENTITY_START, "").replace(ENTITY_SEP, " ")
+
+    @staticmethod
+    def render(entity):
+        fields = entity.split(ENTITY_SEP)
+        if fields[0] == "url" and len(fields) >= 3:
+            title, url = fields[1], fields[-1]
+            return f"[{title}]({url})" if title else url
+        return ""
+
+
+moderation_message ="I'm sorry, I cannot provide or engage in any content related to pornography, violence, or any unethical material. If you have any other questions or need assistance, please feel free to let me know. I'll do my best to provide support and assistance."
 
 
 async def format_not_stream_response(response, prompt_tokens, max_tokens, model):
@@ -150,6 +194,7 @@ async def stream_response(service, response, model, max_tokens):
     last_status = None
     model_slug = None
     end = False
+    entity_filter = EntityMarkerFilter()
 
     chunk_new_data = {
         "id": chat_id,
@@ -331,6 +376,12 @@ async def stream_response(service, response, model, max_tokens):
                 last_message_id = message_id
                 last_role = role
                 last_status = status
+                if delta.get("content") or end:
+                    delta["content"] = entity_filter.feed(delta.get("content") or "")
+                    if end:
+                        delta["content"] += entity_filter.flush()
+                    if not delta["content"] and "role" not in delta:
+                        delta.pop("content")
                 if not end and not delta.get("content"):
                     delta = {"role": "assistant", "content": ""}
                 chunk_new_data["choices"][0]["delta"] = delta
