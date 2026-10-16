@@ -140,9 +140,9 @@ class ChatService:
         else:
             self.gizmo_id = None
 
-        # OpenAI's "*-search-preview" models (e.g. gpt-4o-mini-search-preview) do not exist on the
-        # ChatGPT backend. Map them to their base model and turn on ChatGPT's built-in web search.
-        # OpenAI API clients can also request search explicitly via `web_search_options`.
+        # OpenAI's search models (gpt-5-search-api, gpt-4o-search-preview, gpt-4o-mini-search-preview)
+        # do not exist on the ChatGPT backend. Map them to a ChatGPT model and turn on ChatGPT's
+        # built-in web search. OpenAI API clients can also request search via `web_search_options`.
         self.system_hints = []
         if "-search" in self.origin_model or self.data.get("web_search_options") is not None:
             self.system_hints.append("search")
@@ -167,22 +167,19 @@ class ChatService:
             self.req_model = "o1"
         elif "gpt-4.5o" in self.origin_model:
             self.req_model = "gpt-4.5o"
-        elif "gpt-4o-canmore" in self.origin_model:
-            self.req_model = "gpt-4o-canmore"
-        elif "gpt-4o-mini" in self.origin_model:
-            self.req_model = "gpt-4o-mini"
         elif "gpt-4o" in self.origin_model:
-            self.req_model = "gpt-4o"
+            # The GPT-4o family (gpt-4o, gpt-4o-mini, gpt-4o-canmore, *-search-preview) has been
+            # retired from ChatGPT; let the backend pick its current default model.
+            self.req_model = "auto"
         elif "gpt-4-mobile" in self.origin_model:
             self.req_model = "gpt-4-mobile"
         elif "gpt-4" in self.origin_model:
             self.req_model = "gpt-4"
         elif "gpt-3.5" in self.origin_model:
             self.req_model = "text-davinci-002-render-sha"
-        elif "auto" in self.origin_model:
-            self.req_model = "auto"
         else:
-            self.req_model = "gpt-4o"
+            # "auto" and any unknown model name (e.g. gpt-5-search-api): ChatGPT's default model.
+            self.req_model = "auto"
 
     async def get_chat_requirements(self):
         if conversation_only:

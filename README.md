@@ -31,10 +31,11 @@
 > - [x] 流式、非流式传输
 > - [x] 免登录 GPT-3.5 对话
 > - [x] GPT-3.5 模型对话（传入模型名不包含 gpt-4，则默认使用 gpt-3.5，也就是 text-davinci-002-render-sha）
-> - [x] GPT-4 系列模型对话（传入模型名包含: gpt-4，gpt-4o，gpt-4o-mini，gpt-4-moblie 即可使用对应模型，需传入 AccessToken）
+> - [x] GPT-4 系列模型对话（传入模型名包含: gpt-4，gpt-4-moblie 即可使用对应模型，需传入 AccessToken）
+> - [x] gpt-4o 系列（gpt-4o、gpt-4o-mini 等）已从 ChatGPT 下线，传入这些模型名或未知模型名时使用 `auto`（ChatGPT 当前默认模型）
 > - [x] O1 系列模型对话（传入模型名包含 o1-preview，o1-mini 即可使用对应模型，需传入 AccessToken）
 > - [x] GPT-4 模型画图、代码、联网
-> - [x] 联网搜索（传入模型名包含 `-search`，如 gpt-4o-search-preview、gpt-4o-mini-search-preview，或在请求中传入 `web_search_options`，将使用对应基础模型并开启 ChatGPT 搜索）
+> - [x] 联网搜索（传入模型名包含 `-search`，如 gpt-5-search-api、gpt-4o-search-preview、gpt-4o-mini-search-preview，或在请求中传入 `web_search_options`，将开启 ChatGPT 搜索）
 > - [x] 支持 GPTs（传入模型名：gpt-4-gizmo-g-*）
 > - [x] 支持 Team Plus 账号（需传入 team account id）
 > - [x] 上传图片、文件（格式为 API 对应格式，支持 URL 和 base64）

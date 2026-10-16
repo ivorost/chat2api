@@ -10,6 +10,7 @@ model_proxy = {
     "gpt-4o-mini": "gpt-4o-mini-2024-07-18",
     "gpt-4o-search-preview": "gpt-4o-search-preview-2025-03-11",
     "gpt-4o-mini-search-preview": "gpt-4o-mini-search-preview-2025-03-11",
+    "gpt-5-search-api": "gpt-5-search-api-2025-10-14",
     "o1-preview": "o1-preview-2024-09-12",
     "o1-mini": "o1-mini-2024-09-12",
     "o1": "o1-2024-12-18",
