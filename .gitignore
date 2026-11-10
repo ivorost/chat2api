@@ -6,3 +6,5 @@
 /data/
 /.venv/
 /.vscode/
+chat2api_deploy
+chat2api_deploy.pub
