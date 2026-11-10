@@ -10,7 +10,9 @@ DEPLOY_USER="${DEPLOY_USER:-deploy}"
 PUBKEY="${1:-}"
 
 apt-get update
-apt-get install -y docker.io ufw
+apt-get install -y ufw
+# Keep an existing Docker install (e.g. docker-ce from Docker's repo) as is.
+command -v docker >/dev/null 2>&1 || apt-get install -y docker.io
 systemctl enable --now docker
 
 if ! id "$DEPLOY_USER" >/dev/null 2>&1; then
