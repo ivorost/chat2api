@@ -9,10 +9,24 @@ set -euo pipefail
 DEPLOY_USER="${DEPLOY_USER:-deploy}"
 PUBKEY="${1:-}"
 
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y ufw
-# Keep an existing Docker install (e.g. docker-ce from Docker's repo) as is.
-command -v docker >/dev/null 2>&1 || apt-get install -y docker.io
+apt-get install -y ca-certificates curl ufw
+
+# Latest Docker Engine from Docker's official apt repository.
+install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+chmod a+r /etc/apt/keyrings/docker.asc
+. /etc/os-release
+cat > /etc/apt/sources.list.d/docker.sources <<SRC
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: ${UBUNTU_CODENAME:-$VERSION_CODENAME}
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+SRC
+apt-get update
+apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 systemctl enable --now docker
 
 if ! id "$DEPLOY_USER" >/dev/null 2>&1; then
